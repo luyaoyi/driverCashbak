@@ -23,3 +23,8 @@
 - 选择发布行程或添加常用线路任务时，不展示消息触达模块。
 
 直接打开 `index.html` 或通过本地静态服务访问即可预览，并可通过左侧菜单切换页面。
+
+## 相关文档
+
+- [完单返现后台配置说明](https://github.com/luyaoyi/driverCashbak/blob/main/%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E.md)
+- [真车主任务中心后台改动说明](https://github.com/luyaoyi/driverCashbak/blob/main/%E4%BB%BB%E5%8A%A1%E4%B8%AD%E5%BF%83%E5%90%8E%E5%8F%B0%E6%94%B9%E5%8A%A8%E8%AF%B4%E6%98%8E.md)
