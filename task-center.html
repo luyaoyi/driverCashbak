@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>任务中心后台配置 - 原型</title>
+  <style>
+    :root {
+      --blue: #409eff;
+      --blue-weak: #ecf5ff;
+      --red: #f56c6c;
+      --orange: #e6a23c;
+      --text: #303133;
+      --regular: #606266;
+      --secondary: #909399;
+      --line: #dcdfe6;
+      --line-light: #ebeef5;
+      --bg: #f5f7fa;
+      --label: 180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      color: #fff;
+      background: #263445;
+      box-shadow: 0 1px 4px rgba(0,0,0,.18);
+    }
+    .brand { font-size: 16px; font-weight: 600; letter-spacing: .5px; }
+    .env { font-size: 12px; color: #c7d0db; }
+    .app-shell { min-height: calc(100vh - 54px); display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .side-menu {
+      position: sticky;
+      top: 54px;
+      align-self: start;
+      height: calc(100vh - 54px);
+      padding: 18px 12px;
+      background: #fff;
+      border-right: 1px solid var(--line-light);
+    }
+    .side-menu-title { padding: 8px 12px 12px; color: var(--secondary); font-size: 12px; }
+    .side-menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      padding: 12px 14px;
+      color: var(--regular);
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .side-menu a::before { content: "◆"; color: #c0c4cc; font-size: 9px; }
+    .side-menu a:hover, .side-menu a.active { color: var(--blue); background: var(--blue-weak); }
+    .side-menu a.active { font-weight: 600; }
+    .side-menu a.active::before { color: var(--blue); }
+    .workbench { min-width: 0; }
+    .layout {
+      width: min(1380px, calc(100% - 40px));
+      margin: 22px auto 60px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 20px;
+      align-items: start;
+    }
+    .breadcrumb { margin: 2px 0 18px; color: var(--secondary); }
+    .breadcrumb b { color: var(--regular); font-weight: 500; }
+    .breadcrumb span { margin: 0 9px; color: #c0c4cc; }
+    .card {
+      margin-bottom: 18px;
+      background: #fff;
+      border: 1px solid var(--line-light);
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.035);
+      overflow: hidden;
+    }
+    .card.new-module { border-color: #a9d2ff; box-shadow: 0 2px 12px rgba(64,158,255,.1); }
+    .card-header {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line-light);
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .card-body { padding: 24px 24px 16px; }
+    .new-badge { padding: 3px 9px; color: var(--blue); background: var(--blue-weak); border: 1px solid #b3d8ff; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .form-row { min-height: 40px; display: grid; grid-template-columns: var(--label) minmax(0, 1fr); gap: 14px; align-items: start; margin-bottom: 20px; }
+    .label { padding-top: 9px; text-align: right; color: var(--regular); }
+    .required::before { content: "*"; color: var(--red); margin-right: 4px; }
+    .control { min-width: 0; }
+    .inline { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-height: 40px; }
+    input[type="text"], input[type="number"], input[type="datetime-local"], select, textarea {
+      width: 420px;
+      max-width: 100%;
+      min-height: 36px;
+      padding: 8px 12px;
+      color: var(--regular);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      outline: none;
+      font: inherit;
+    }
+    input[type="number"] { width: 200px; }
+    input[type="datetime-local"] { width: 240px; }
+    textarea { min-height: 96px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(64,158,255,.12); }
+    input:disabled, select:disabled { color: #a8abb2; background: #f5f7fa; cursor: not-allowed; }
+    .radio, .checkbox { display: inline-flex; align-items: center; gap: 7px; margin-right: 18px; cursor: pointer; }
+    .radio input, .checkbox input { width: 16px; height: 16px; margin: 0; accent-color: var(--blue); }
+    .radio.disabled { color: #b7bbc2; cursor: not-allowed; }
+    .tip { margin-top: 6px; color: var(--secondary); font-size: 12px; line-height: 1.7; }
+    .tip.info::before { content: "ⓘ"; margin-right: 5px; color: var(--blue); }
+    .rule-tip { margin: -2px 0 20px calc(var(--label) + 14px); padding: 10px 14px; color: #7a5d16; background: #fdf6ec; border-left: 3px solid var(--orange); line-height: 1.7; }
+    .unit { color: var(--regular); }
+    .range { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .upload { width: 112px; height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--secondary); background: #fafafa; border: 1px dashed #c0ccda; border-radius: 4px; cursor: pointer; }
+    .upload:hover { color: var(--blue); border-color: var(--blue); }
+    .upload .plus { font-size: 25px; font-weight: 300; }
+    .hidden { display: none !important; }
+    .footer-actions { position: sticky; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 16px; padding: 18px; background: rgba(255,255,255,.96); border-top: 1px solid var(--line-light); box-shadow: 0 -3px 10px rgba(0,0,0,.04); }
+    button { min-width: 82px; height: 34px; padding: 0 16px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--regular); cursor: pointer; font: inherit; }
+    button:hover { color: var(--blue); border-color: #c6e2ff; background: var(--blue-weak); }
+    button.primary { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .outline { position: sticky; top: 76px; background: #fff; border: 1px solid var(--line-light); border-radius: 4px; padding: 14px 0; }
+    .outline-title { padding: 0 16px 10px; font-weight: 600; border-bottom: 1px solid var(--line-light); }
+    .outline a { display: block; padding: 9px 16px; color: var(--regular); text-decoration: none; border-left: 3px solid transparent; }
+    .outline a:hover { color: var(--blue); background: var(--blue-weak); border-left-color: var(--blue); }
+    .outline a.new { color: var(--blue); font-weight: 600; }
+    .toast { position: fixed; left: 50%; top: 72px; z-index: 50; transform: translate(-50%, -12px); padding: 11px 18px; color: #fff; background: rgba(34,34,34,.88); border-radius: 4px; opacity: 0; pointer-events: none; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 980px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .side-menu { position: static; height: auto; display: flex; gap: 8px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line-light); }
+      .side-menu-title { display: none; }
+      .side-menu a { margin: 0; }
+      .layout { grid-template-columns: 1fr; width: calc(100% - 24px); }
+      .outline { display: none; }
+      :root { --label: 135px; }
+    }
+    @media (max-width: 620px) {
+      .form-row { grid-template-columns: 1fr; gap: 6px; }
+      .label { text-align: left; padding-top: 0; }
+      .rule-tip { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">出行营销活动管理后台</div>
+    <div class="env">原型预览 · 真车主营销配置</div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="side-menu">
+      <div class="side-menu-title">真车主</div>
+      <a href="./index.html">完单返现</a>
+      <a class="active" href="./task-center.html">任务中心后台</a>
+    </aside>
+
+    <div class="workbench">
+      <div class="layout">
+        <main>
+          <div class="breadcrumb"><b>真车主</b><span>›</span>任务中心后台<span>›</span>新建任务</div>
+
+          <form id="taskCenterForm" novalidate>
+            <section class="card" id="base">
+              <div class="card-header">任务基础配置</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">活动名称</label><div class="control"><input id="activityName" type="text" maxlength="64" placeholder="请输入活动名称" /></div></div>
+                <div class="form-row"><label class="label required">任务状态</label><div class="control inline"><label class="radio"><input name="taskStatus" type="radio" checked />有效</label><label class="radio"><input name="taskStatus" type="radio" />无效</label></div></div>
+                <div class="form-row"><label class="label required">任务有效期</label><div class="control inline"><label class="radio"><input name="validType" value="fixed" type="radio" checked />固定时间生效</label><label class="radio"><input name="validType" value="long" type="radio" />长期有效</label></div></div>
+                <div id="validTime" class="form-row"><label class="label required">有效时间</label><div class="control range"><input type="datetime-local" /><span>至</span><input type="datetime-local" /></div></div>
+              </div>
+            </section>
+
+            <section class="card" id="delivery">
+              <div class="card-header">投放限制</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label">限制条件</label><div class="control inline">
+                  <label class="checkbox"><input type="checkbox" />司机接单数量</label>
+                  <label class="checkbox"><input type="checkbox" />会员卡</label>
+                  <label class="checkbox"><input type="checkbox" />司机标签</label>
+                  <label class="checkbox"><input type="checkbox" />先知人群</label>
+                  <label class="checkbox"><input type="checkbox" />AB 实验</label>
+                </div></div>
+                <div class="tip" style="margin-left:194px">原型保留现有投放限制入口，本次不调整限制规则。</div>
+              </div>
+            </section>
+
+            <section class="card" id="task">
+              <div class="card-header">任务配置</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">任务周期</label><div class="control inline">
+                  <label class="radio"><input id="periodOnce" name="period" value="once" type="radio" checked />一次性任务</label>
+                  <label class="radio" id="periodCooldownLabel"><input id="periodCooldown" name="period" value="cooldown" type="radio" />冷却周期型任务</label>
+                </div></div>
+                <div id="cooldownRow" class="form-row hidden"><label class="label required">冷却天数</label><div class="control inline"><input type="number" min="0" max="365" value="7" /><span class="unit">天</span></div></div>
+                <div class="form-row"><label class="label required">任务类型</label><div class="control"><select id="taskType">
+                  <option value="completeOrder">完单任务</option>
+                  <option value="publishTrip">发布行程任务</option>
+                  <option value="addRoute">添加常用线路任务</option>
+                </select></div></div>
+                <div id="completeOrderFields">
+                  <div class="form-row"><label class="label required">完成订单数</label><div class="control"><input id="completeOrderCount" type="number" min="1" max="9999" value="10" /></div></div>
+                  <div class="form-row"><label class="label">是否关联司机指标</label><div class="control inline"><label class="checkbox"><input id="linkMetric" type="checkbox" checked />关联接完率</label><input id="metricValue" type="number" min="0" max="100" step="0.01" value="75" /><span class="unit">%</span></div></div>
+                </div>
+                <div id="actionTaskFields" class="hidden">
+                  <div class="form-row"><label class="label required">司机状态条件</label><div class="control"><input id="driverCondition" type="text" value="认证未发布行程" disabled /></div></div>
+                  <div class="form-row"><label class="label required">是否完成首单领取</label><div class="control inline"><label class="checkbox"><input type="checkbox" checked disabled />固定开启</label></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" id="reward">
+              <div class="card-header"><span>奖励配置</span><span class="new-badge">规则调整</span></div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">奖励类型</label><div class="control inline">
+                  <label id="normalRewardLabel" class="radio"><input id="rewardNormal" name="rewardType" value="normal" type="radio" checked />普通奖励（营销平台领取工具）</label>
+                  <label id="cashRewardLabel" class="radio"><input id="rewardCash" name="rewardType" value="cash" type="radio" />现金奖励</label>
+                </div></div>
+                <div id="rewardRuleTip" class="rule-tip">完单任务不允许选择现金奖励，仅支持普通奖励。</div>
+                <div id="normalRewardFields" class="form-row"><label class="label required">普通奖励领取 code</label><div class="control"><select id="normalRewardCode"><option value="">请选择普通奖励</option><option value="PROMO_NORMAL_001">司机成长礼包_PROMO_NORMAL_001</option></select></div></div>
+                <div id="cashRewardFields" class="hidden">
+                  <div class="form-row"><label class="label required">奖励金额</label><div class="control inline"><input id="cashAmount" type="number" min="1" max="100" value="1" /><span class="unit">元</span></div></div>
+                  <div class="form-row"><label class="label required">现金奖励 code</label><div class="control"><input id="cashRewardCode" type="text" maxlength="128" placeholder="请输入现金奖励发放 code" /></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card new-module" id="message">
+              <div class="card-header"><span>消息触达</span><span class="new-badge">本次新增</span></div>
+              <div class="card-body">
+                <div class="form-row"><label class="label">消息触达方式</label><div class="control inline">
+                  <label class="checkbox"><input id="madaChannel" name="messageChannel" value="mada" type="checkbox" />马达平台</label>
+                </div></div>
+                <div class="rule-tip">消息触达方式非必填，支持多选；本次仅提供“马达平台”。历史配置默认不勾选。</div>
+              </div>
+            </section>
+
+            <section class="card" id="display">
+              <div class="card-header">前端样式配置</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">任务标题</label><div class="control"><input id="taskTitle" type="text" maxlength="40" placeholder="请输入任务标题" /></div></div>
+                <div class="form-row"><label class="label">任务 icon</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div><div class="tip">选填，建议尺寸 120×120，JPG/PNG 格式</div></div></div>
+                <div class="form-row"><label class="label">任务标签</label><div class="control inline"><label class="radio"><input name="taskTag" type="radio" checked />无</label><label class="radio"><input name="taskTag" type="radio" />新手任务</label></div></div>
+                <div class="form-row"><label class="label required">展示顺序</label><div class="control inline"><input id="displayOrder" type="number" min="1" max="99" value="10" /><span>数值越小，排序越高</span></div></div>
+                <div class="form-row"><label class="label">任务角标</label><div class="control"><input type="text" maxlength="10" placeholder="请输入任务角标" /></div></div>
+                <div class="form-row"><label class="label">任务副标题</label><div class="control"><input type="text" maxlength="60" placeholder="请输入任务副标题" /></div></div>
+                <div class="form-row"><label class="label">奖励名称</label><div class="control"><input type="text" maxlength="200" placeholder="请输入奖励名称" /></div></div>
+                <div class="form-row"><label class="label">任务说明</label><div class="control"><textarea maxlength="1500" placeholder="请输入任务说明"></textarea></div></div>
+              </div>
+            </section>
+
+            <div class="footer-actions">
+              <button type="button" id="resetBtn">重置</button>
+              <button type="button" id="closeBtn">关闭</button>
+              <button class="primary" type="submit">保存</button>
+            </div>
+          </form>
+        </main>
+
+        <aside class="outline">
+          <div class="outline-title">页面模块</div>
+          <a href="#base">任务基础配置</a>
+          <a href="#delivery">投放限制</a>
+          <a href="#task">任务配置</a>
+          <a class="new" href="#reward">奖励配置 · 规则调整</a>
+          <a class="new" href="#message">消息触达 · 新增</a>
+          <a href="#display">前端样式配置</a>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+    const toast = text => {
+      const el = $('#toast');
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    };
+
+    const syncRewardFields = () => {
+      const normal = $('#rewardNormal').checked;
+      $('#normalRewardFields').classList.toggle('hidden', !normal);
+      $('#cashRewardFields').classList.toggle('hidden', normal);
+    };
+
+    const syncTaskType = () => {
+      const taskType = $('#taskType').value;
+      const completeOrder = taskType === 'completeOrder';
+
+      $('#completeOrderFields').classList.toggle('hidden', !completeOrder);
+      $('#actionTaskFields').classList.toggle('hidden', completeOrder);
+      $('#message').classList.toggle('hidden', !completeOrder);
+
+      $('#periodCooldown').disabled = !completeOrder;
+      $('#periodCooldownLabel').classList.toggle('disabled', !completeOrder);
+      if (!completeOrder) {
+        $('#periodOnce').checked = true;
+        $('#cooldownRow').classList.add('hidden');
+        $('#driverCondition').value = taskType === 'publishTrip' ? '认证未发布行程' : '认证未添加常用线路';
+      }
+
+      $('#rewardCash').disabled = completeOrder;
+      $('#cashRewardLabel').classList.toggle('disabled', completeOrder);
+      $('#rewardNormal').disabled = !completeOrder;
+      $('#normalRewardLabel').classList.toggle('disabled', !completeOrder);
+
+      if (completeOrder) {
+        $('#rewardNormal').checked = true;
+        $('#rewardRuleTip').textContent = '完单任务不允许选择现金奖励，仅支持普通奖励。';
+      } else {
+        $('#rewardCash').checked = true;
+        $('#rewardRuleTip').textContent = '发布行程、添加常用线路任务不允许选择普通奖励，仅支持现金奖励。';
+      }
+      syncRewardFields();
+    };
+
+    $('#taskType').addEventListener('change', syncTaskType);
+    $$('input[name="rewardType"]').forEach(input => input.addEventListener('change', syncRewardFields));
+    $$('input[name="period"]').forEach(input => input.addEventListener('change', () => {
+      $('#cooldownRow').classList.toggle('hidden', !$('#periodCooldown').checked);
+    }));
+    $$('input[name="validType"]').forEach(input => input.addEventListener('change', () => {
+      $('#validTime').classList.toggle('hidden', $('input[name="validType"]:checked').value === 'long');
+    }));
+
+    $('#taskCenterForm').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!$('#activityName').value.trim()) { toast('请填写活动名称'); $('#activityName').focus(); return; }
+      if (!$('#taskTitle').value.trim()) { toast('请填写任务标题'); $('#taskTitle').focus(); return; }
+      const order = Number($('#displayOrder').value);
+      if (!Number.isInteger(order) || order < 1 || order > 99) { toast('展示顺序需为 1～99 的正整数'); $('#displayOrder').focus(); return; }
+
+      const completeOrder = $('#taskType').value === 'completeOrder';
+      if (completeOrder && !$('#rewardNormal').checked) { toast('完单任务仅支持普通奖励'); return; }
+      if (!completeOrder && !$('#rewardCash').checked) { toast('当前任务仅支持现金奖励'); return; }
+      if (completeOrder && !$('#normalRewardCode').value) { toast('请选择普通奖励'); $('#normalRewardCode').focus(); return; }
+      if (!completeOrder) {
+        const amount = Number($('#cashAmount').value);
+        if (!Number.isInteger(amount) || amount < 1 || amount > 100) { toast('现金奖励金额需为 1～100 的正整数'); $('#cashAmount').focus(); return; }
+        if (!$('#cashRewardCode').value.trim()) { toast('请填写现金奖励 code'); $('#cashRewardCode').focus(); return; }
+      }
+      toast('校验通过，原型模拟保存成功');
+    });
+
+    $('#resetBtn').addEventListener('click', () => {
+      $('#taskCenterForm').reset();
+      $('#taskType').value = 'completeOrder';
+      syncTaskType();
+      toast('已恢复默认配置');
+    });
+    $('#closeBtn').addEventListener('click', () => toast('原型模式：已触发关闭操作'));
+    $$('.upload').forEach(el => el.addEventListener('click', () => toast('原型模式：触发图片上传')));
+
+    syncTaskType();
+  </script>
+</body>
+</html>
