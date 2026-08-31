@@ -397,6 +397,12 @@
               <div class="form-row"><label class="label">任务副标题</label><div class="control"><input type="text" maxlength="60" placeholder="请输入任务副标题" /></div></div>
               <div class="form-row"><label class="label">奖励名称</label><div class="control"><input type="text" maxlength="200" placeholder="请输入奖励名称" /></div></div>
               <div class="form-row"><label class="label">任务说明</label><div class="control"><textarea maxlength="1500" placeholder="请输入任务说明"></textarea><div class="tip">最多1500个字符</div></div></div>
+              <div class="form-row"><label class="label required">是否开启认证通过倒计时</label><div class="control">
+                <div class="inline"><label class="radio"><input name="authCountdown" value="yes" type="radio" />开启</label><label class="radio"><input name="authCountdown" value="no" type="radio" checked />关闭</label></div>
+                <div class="tip info">用于前端呈现“X天内完单奖励现金”</div>
+              </div></div>
+              <div id="authCountdownDays" class="form-row hidden"><label class="label required">认证通过后天数</label><div class="control"><div class="inline"><input id="countdownDays" type="number" min="1" max="20" step="1" placeholder="请输入1～20" /><span class="unit">天</span></div><div class="tip info">1天按24小时计算；如配置3天，表示认证通过后72小时内展示倒计时。</div></div></div>
+              <div class="form-row"><label class="label">奖励中心外显激励文案</label><div class="control"><input id="rewardCenterCopy" type="text" placeholder="请输入奖励中心外显激励文案（选填）" /><div class="tip">选填，用于奖励中心展示激励文案</div></div></div>
             </div>
           </div>
         </section>
@@ -457,6 +463,12 @@
       $('#newbieFields').classList.toggle('hidden', !(input.checked && input.value === 'newbie'));
     }));
 
+    $$('input[name="authCountdown"]').forEach(input => input.addEventListener('change', () => {
+      const enabled = input.checked && input.value === 'yes';
+      $('#authCountdownDays').classList.toggle('hidden', !enabled);
+      if (!enabled) $('#countdownDays').value = '';
+    }));
+
     $('#activityForm').addEventListener('submit', event => {
       event.preventDefault();
       if (!$('#actName').value.trim()) { toast('请填写活动名称'); $('#actName').focus(); return; }
@@ -465,6 +477,11 @@
         if (!$('#taskTitle').value.trim()) { toast('聚合到任务中心时，请填写任务标题'); $('#taskTitle').focus(); return; }
         const order = Number($('#displayOrder').value);
         if (!Number.isInteger(order) || order < 1 || order > 99) { toast('展示顺序需为1～99之间的正整数'); $('#displayOrder').focus(); return; }
+        const countdownEnabled = $('input[name="authCountdown"]:checked').value === 'yes';
+        if (countdownEnabled) {
+          const days = Number($('#countdownDays').value);
+          if (!Number.isInteger(days) || days < 1 || days > 20) { toast('认证通过后天数需为1～20之间的正整数'); $('#countdownDays').focus(); return; }
+        }
       }
       toast('校验通过，原型模拟保存成功');
     });
