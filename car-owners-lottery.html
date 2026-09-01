@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>真车主抽奖活动配置 - 原型</title>
+  <style>
+    :root { --blue:#409eff; --blue-weak:#ecf5ff; --red:#f56c6c; --orange:#e6a23c; --text:#303133; --regular:#606266; --secondary:#909399; --line:#dcdfe6; --line-light:#ebeef5; --bg:#f5f7fa; --label:200px; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--text); background:var(--bg); font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    .topbar { position:sticky; top:0; z-index:30; height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; color:#fff; background:#263445; box-shadow:0 1px 4px rgba(0,0,0,.18); }
+    .brand { font-size:16px; font-weight:600; }
+    .env { font-size:12px; color:#c7d0db; }
+    .app-shell { min-height:calc(100vh - 54px); display:grid; grid-template-columns:220px minmax(0,1fr); }
+    .side-menu { position:sticky; top:54px; align-self:start; height:calc(100vh - 54px); padding:18px 12px; background:#fff; border-right:1px solid var(--line-light); }
+    .side-menu-title { padding:8px 12px 12px; color:var(--secondary); font-size:12px; }
+    .side-menu a { display:flex; align-items:center; gap:10px; margin-bottom:6px; padding:12px 14px; color:var(--regular); text-decoration:none; border-radius:4px; }
+    .side-menu a::before { content:"◆"; color:#c0c4cc; font-size:9px; }
+    .side-menu a:hover,.side-menu a.active { color:var(--blue); background:var(--blue-weak); }
+    .side-menu a.active { font-weight:600; }
+    .side-menu a.active::before { color:var(--blue); }
+    .workbench { min-width:0; }
+    .layout { width:min(1400px,calc(100% - 40px)); margin:22px auto 60px; display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:20px; align-items:start; }
+    .breadcrumb { margin:2px 0 18px; color:var(--secondary); }
+    .breadcrumb b { color:var(--regular); font-weight:500; }
+    .breadcrumb span { margin:0 9px; color:#c0c4cc; }
+    .card { margin-bottom:18px; background:#fff; border:1px solid var(--line-light); border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,.035); overflow:hidden; }
+    .card.new-module { border-color:#a9d2ff; box-shadow:0 2px 12px rgba(64,158,255,.1); }
+    .card-header { min-height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; border-bottom:1px solid var(--line-light); font-size:15px; font-weight:600; }
+    .card-body { padding:24px 24px 16px; }
+    .new-badge { padding:3px 9px; color:var(--blue); background:var(--blue-weak); border:1px solid #b3d8ff; border-radius:12px; font-size:12px; font-weight:500; }
+    .form-row { min-height:40px; display:grid; grid-template-columns:var(--label) minmax(0,1fr); gap:14px; align-items:start; margin-bottom:20px; }
+    .label { padding-top:9px; text-align:right; color:var(--regular); }
+    .required::before { content:"*"; color:var(--red); margin-right:4px; }
+    .control { min-width:0; }
+    .inline { display:flex; align-items:center; flex-wrap:wrap; gap:12px; min-height:40px; }
+    input[type="text"],input[type="number"],input[type="datetime-local"],select,textarea { width:420px; max-width:100%; min-height:36px; padding:8px 12px; color:var(--regular); background:#fff; border:1px solid var(--line); border-radius:4px; outline:none; font:inherit; }
+    input[type="number"] { width:200px; }
+    input[type="datetime-local"] { width:240px; }
+    textarea { min-height:96px; resize:vertical; }
+    input:focus,select:focus,textarea:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(64,158,255,.12); }
+    .radio,.checkbox { display:inline-flex; align-items:center; gap:7px; margin-right:18px; cursor:pointer; }
+    .radio input,.checkbox input { width:16px; height:16px; margin:0; accent-color:var(--blue); }
+    .tip { margin-top:6px; color:var(--secondary); font-size:12px; line-height:1.7; }
+    .tip.info::before { content:"ⓘ"; margin-right:5px; color:var(--blue); }
+    .unit { color:var(--regular); }
+    .range { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+    .upload { width:112px; height:92px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:var(--secondary); background:#fafafa; border:1px dashed #c0ccda; border-radius:4px; cursor:pointer; }
+    .upload:hover { color:var(--blue); border-color:var(--blue); }
+    .upload .plus { font-size:25px; font-weight:300; }
+    .group-card { margin:0 0 16px calc(var(--label) + 14px); padding:16px; border:1px solid var(--line-light); border-radius:4px; background:#fafafa; }
+    .group-title { margin-bottom:14px; font-weight:600; }
+    .prize-grid { display:grid; grid-template-columns:1.2fr 1fr 1fr 110px; gap:10px; align-items:center; }
+    .prize-grid input,.prize-grid select { width:100%; }
+    .hidden { display:none !important; }
+    .footer-actions { position:sticky; bottom:0; z-index:10; display:flex; justify-content:center; gap:16px; padding:18px; background:rgba(255,255,255,.96); border-top:1px solid var(--line-light); box-shadow:0 -3px 10px rgba(0,0,0,.04); }
+    button { min-width:82px; height:34px; padding:0 16px; border:1px solid var(--line); border-radius:4px; background:#fff; color:var(--regular); cursor:pointer; font:inherit; }
+    button:hover { color:var(--blue); border-color:#c6e2ff; background:var(--blue-weak); }
+    button.primary { color:#fff; background:var(--blue); border-color:var(--blue); }
+    .outline { position:sticky; top:76px; background:#fff; border:1px solid var(--line-light); border-radius:4px; padding:14px 0; }
+    .outline-title { padding:0 16px 10px; font-weight:600; border-bottom:1px solid var(--line-light); }
+    .outline a { display:block; padding:9px 16px; color:var(--regular); text-decoration:none; border-left:3px solid transparent; }
+    .outline a:hover { color:var(--blue); background:var(--blue-weak); border-left-color:var(--blue); }
+    .outline a.new { color:var(--blue); font-weight:600; }
+    .toast { position:fixed; left:50%; top:72px; z-index:50; transform:translate(-50%,-12px); padding:11px 18px; color:#fff; background:rgba(34,34,34,.88); border-radius:4px; opacity:0; pointer-events:none; transition:.2s ease; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (max-width:980px) { .app-shell{grid-template-columns:1fr}.side-menu{position:static;height:auto;display:flex;gap:8px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line-light)}.side-menu-title{display:none}.side-menu a{margin:0}.layout{grid-template-columns:1fr;width:calc(100% - 24px)}.outline{display:none}:root{--label:150px} }
+    @media (max-width:680px) { .form-row{grid-template-columns:1fr;gap:6px}.label{text-align:left;padding-top:0}.group-card{margin-left:0}.prize-grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="brand">出行营销活动管理后台</div><div class="env">原型预览 · 真车主营销配置</div></header>
+  <div class="app-shell">
+    <aside class="side-menu">
+      <div class="side-menu-title">真车主</div>
+      <a href="./index.html">完单返现</a>
+      <a href="./task-center.html">任务中心后台</a>
+      <a href="./membership-expansion.html">会员权益膨胀</a>
+      <a class="active" href="./car-owners-lottery.html">真车主抽奖</a>
+    </aside>
+    <div class="workbench">
+      <div class="layout">
+        <main>
+          <div class="breadcrumb"><b>真车主</b><span>›</span>抽奖激励活动配置<span>›</span>新建</div>
+          <form id="lotteryForm" novalidate>
+            <section class="card" id="base">
+              <div class="card-header">基础信息</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">活动名称</label><div class="control"><input id="activityName" type="text" placeholder="请输入活动名称" /></div></div>
+                <div class="form-row"><label class="label required">优先级</label><div class="control"><input id="priority" type="number" min="1" max="9999" step="1" value="1" /><div class="tip info">数字越大优先级越高</div></div></div>
+                <div class="form-row"><label class="label required">活动有效期</label><div class="control range"><input id="beginTime" type="datetime-local" /><span>至</span><input id="endTime" type="datetime-local" /></div></div>
+                <div class="form-row"><label class="label required">活动状态</label><div class="control inline"><label class="radio"><input name="status" type="radio" checked />有效</label><label class="radio"><input name="status" type="radio" />无效</label></div></div>
+              </div>
+            </section>
+
+            <section class="card" id="limit">
+              <div class="card-header">活动限制</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label">是否启用先知人群</label><div class="control inline"><label class="checkbox"><input id="prophetEnabled" type="checkbox" />启用</label></div></div>
+                <div id="prophetFields" class="hidden">
+                  <div class="form-row"><label class="label required">先知场景</label><div class="control"><select><option value="">请选择先知场景</option><option>司机会员运营</option></select></div></div>
+                  <div class="form-row"><label class="label required">先知人群标签</label><div class="control"><select><option value="">请选择先知人群标签</option><option>高活跃司机</option></select></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" id="chance">
+              <div class="card-header">活动规则——抽奖次数</div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">每日基础次数</label><div class="control"><div class="inline"><input id="dailyBaseTimes" type="number" min="0" max="10" step="1" value="1" /><span class="unit">次</span></div><div class="tip">支持配置 0～10；配置为 0 时不发放每日基础次数</div></div></div>
+                <div class="form-row"><label class="label required">是否增加额外次数</label><div class="control inline"><label class="radio"><input name="extraEnabled" value="no" type="radio" checked />否</label><label class="radio"><input name="extraEnabled" value="yes" type="radio" />是</label></div></div>
+                <div id="extraFields" class="hidden">
+                  <div class="form-row"><label class="label required">次数来源</label><div class="control inline"><label class="radio"><input type="radio" checked disabled />完成订单</label></div></div>
+                  <div class="form-row"><label class="label">订单限制条件</label><div class="control inline"><label class="checkbox"><input type="checkbox" />接单公里数</label><label class="checkbox"><input type="checkbox" />城市限制</label><label class="checkbox"><input type="checkbox" />司机原结算金额</label></div></div>
+                  <div class="form-row"><label class="label required">每日额外次数上限</label><div class="control inline"><input id="dailyExtraCap" type="number" min="1" max="100" step="1" value="1" /><span class="unit">次</span></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" id="groups">
+              <div class="card-header">活动规则——用户分组</div>
+              <div class="card-body">
+                <div class="group-card">
+                  <div class="group-title">兜底分组</div>
+                  <div class="form-row"><label class="label">真实奖品</label><div class="control"><div class="tip">当前概率合计：20%，空奖概率：80%</div></div></div>
+                  <div class="prize-grid"><select><option>会员卡</option><option>奖励金卡</option><option>膨胀权益</option></select><input type="text" placeholder="奖品活动编号" /><input type="text" placeholder="奖品名称" /><input type="number" min="0.01" max="100" step="0.01" value="20" /></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card new-module" id="front-style">
+              <div class="card-header"><span>前端样式配置</span><span class="new-badge">新增入口文案</span></div>
+              <div class="card-body">
+                <div class="form-row"><label class="label required">落地页头图</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div></div></div>
+                <div class="form-row"><label class="label required">首页头图-微信</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div></div></div>
+                <div class="form-row"><label class="label required">首页头图-APP</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div></div></div>
+                <div class="form-row"><label class="label required">首页公告栏</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div></div></div>
+                <div class="form-row"><label class="label required">首页弹窗</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div></div></div>
+                <div class="form-row"><label class="label required">订单详情页弹窗</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div></div></div>
+                <div class="form-row"><label class="label required">活动说明</label><div class="control"><textarea placeholder="请输入活动说明"></textarea></div></div>
+                <div class="form-row"><label class="label required">规则说明</label><div class="control"><textarea placeholder="请输入规则说明"></textarea></div></div>
+                <div class="form-row"><label class="label">奖励中心入口文案</label><div class="control"><input id="rewardCenterEntryCopy" type="text" placeholder="请输入奖励中心入口文案（选填）" /><div class="tip">非必填；未配置时不展示自定义入口文案。历史活动默认为空。</div></div></div>
+              </div>
+            </section>
+
+            <section class="card" id="display-prizes">
+              <div class="card-header">前端样式配置——外显奖品</div>
+              <div class="card-body"><div class="tip">外显奖品不参与抽奖；前端奖池为所有用户分组真实奖品并集加上外显奖品。</div></div>
+            </section>
+
+            <section class="card" id="message">
+              <div class="card-header">消息触达</div>
+              <div class="card-body"><div class="form-row"><label class="label">推送平台</label><div class="control inline"><label class="checkbox"><input id="madaEnabled" type="checkbox" />马达平台</label></div></div><div id="madaFields" class="hidden"><div class="form-row"><label class="label required">推送节点</label><div class="control inline"><label class="checkbox"><input type="checkbox" />周一</label><label class="checkbox"><input type="checkbox" />周三</label><label class="checkbox"><input type="checkbox" />周五</label></div></div></div></div>
+            </section>
+
+            <div class="footer-actions"><button type="button" id="closeBtn">关闭</button><button class="primary" type="submit">确定</button></div>
+          </form>
+        </main>
+        <aside class="outline">
+          <div class="outline-title">页面模块</div>
+          <a href="#base">基础信息</a><a href="#limit">活动限制</a><a href="#chance">抽奖次数</a><a href="#groups">用户分组</a><a class="new" href="#front-style">前端样式配置 · 调整</a><a href="#display-prizes">外显奖品</a><a href="#message">消息触达</a>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => Array.from(document.querySelectorAll(selector));
+    let toastTimer;
+    function toast(message) { const el=$('#toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2200); }
+    function toggle(selector, visible) { $(selector).classList.toggle('hidden', !visible); }
+    $('#prophetEnabled').addEventListener('change', event => toggle('#prophetFields', event.target.checked));
+    $$('input[name="extraEnabled"]').forEach(input => input.addEventListener('change', () => toggle('#extraFields', input.checked && input.value === 'yes')));
+    $('#madaEnabled').addEventListener('change', event => toggle('#madaFields', event.target.checked));
+    $('#lotteryForm').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!$('#activityName').value.trim()) { toast('请输入活动名称'); $('#activityName').focus(); return; }
+      const priority=Number($('#priority').value); if (!Number.isInteger(priority)||priority<1||priority>9999) { toast('优先级需为1～9999的正整数'); $('#priority').focus(); return; }
+      if (!$('#beginTime').value||!$('#endTime').value) { toast('请配置活动有效期'); return; }
+      if ($('#endTime').value <= $('#beginTime').value) { toast('活动结束时间必须晚于开始时间'); $('#endTime').focus(); return; }
+      const baseTimes=Number($('#dailyBaseTimes').value); if (!Number.isInteger(baseTimes)||baseTimes<0||baseTimes>10) { toast('每日基础次数需为0～10的整数'); $('#dailyBaseTimes').focus(); return; }
+      toast('校验通过，原型模拟保存成功');
+    });
+    $('#closeBtn').addEventListener('click', () => toast('原型模式：已触发关闭操作'));
+    $$('.upload').forEach(el => el.addEventListener('click', () => toast('原型模式：触发图片上传')));
+  </script>
+</body>
+</html>

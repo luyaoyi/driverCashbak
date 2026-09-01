@@ -1,10 +1,11 @@
 # 真车主营销后台原型
 
-本原型基于 `tc-flight-marketing-flyactapi14mng` 中现有完单返现、`driverTaskCenter` 和 `carOwnersExpansionRate` 后台页面结构复现，通过左侧菜单提供三个后台页面：
+本原型基于 `tc-flight-marketing-flyactapi14mng` 中现有完单返现、`driverTaskCenter`、`carOwnersExpansionRate` 和 `carOwnersLottery` 后台页面结构复现，通过左侧菜单提供四个后台页面：
 
 - 完单返现
 - 任务中心后台
 - 会员权益膨胀
+- 真车主抽奖
 
 ## 完单返现页面
 
@@ -32,6 +33,11 @@
 - 活动配置模块新增常规膨胀比例，必填，支持 1～50 的正整数。
 - 新增前端样式模块，支持选填奖励中心入口文案。
 
+## 真车主抽奖页面
+
+- 保留现有基础信息、活动限制、抽奖次数、用户分组、前端样式、外显奖品和消息触达配置。
+- 在前端样式配置模块新增奖励中心入口文案，文本输入框，非必填。
+
 直接打开 `index.html` 或通过本地静态服务访问即可预览，并可通过左侧菜单切换页面。
 
 ## 相关文档
@@ -39,3 +45,4 @@
 - [完单返现后台配置说明](https://github.com/luyaoyi/driverCashbak/blob/main/%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E.md)
 - [真车主任务中心后台改动说明](https://github.com/luyaoyi/driverCashbak/blob/main/%E4%BB%BB%E5%8A%A1%E4%B8%AD%E5%BF%83%E5%90%8E%E5%8F%B0%E6%94%B9%E5%8A%A8%E8%AF%B4%E6%98%8E.md)
 - [会员权益膨胀后台改动说明](https://github.com/luyaoyi/driverCashbak/blob/main/%E4%BC%9A%E5%91%98%E6%9D%83%E7%9B%8A%E8%86%A8%E8%83%80%E5%90%8E%E5%8F%B0%E6%94%B9%E5%8A%A8%E8%AF%B4%E6%98%8E.md)
+- [真车主抽奖后台改动说明](https://github.com/luyaoyi/driverCashbak/blob/main/%E7%9C%9F%E8%BD%A6%E4%B8%BB%E6%8A%BD%E5%A5%96%E5%90%8E%E5%8F%B0%E6%94%B9%E5%8A%A8%E8%AF%B4%E6%98%8E.md)
