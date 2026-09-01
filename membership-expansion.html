@@ -151,6 +151,7 @@
               <div class="card-header"><span>活动配置</span><span class="new-badge">新增常规比例</span></div>
               <div class="card-body">
                 <div class="form-row"><label class="label required">限时膨胀比例</label><div class="control"><div class="inline"><input id="limitedRate" type="number" min="1" max="50" step="1" value="1" /><span class="unit">%</span></div><div class="tip">现有配置，支持 1～50 的正整数</div></div></div>
+                <div class="form-row"><label class="label required">确认限时膨胀比例</label><div class="control"><div class="inline"><input id="limitedRateConfirm" type="number" min="1" max="50" step="1" placeholder="请再次输入限时膨胀比例" /><span class="unit">%</span></div><div class="tip info">请再次输入限时膨胀比例，两次输入必须完全一致。</div></div></div>
                 <div class="form-row"><label class="label required">常规膨胀比例</label><div class="control"><div class="inline"><input id="regularRate" type="number" min="1" max="50" step="1" value="1" /><span class="unit">%</span></div><div class="tip info">用于配置非限时场景下的权益膨胀比例，支持 1～50 的正整数；历史配置按 1% 回显。</div></div></div>
               </div>
             </section>
@@ -242,6 +243,8 @@
       if (!$('#beginTime').value || !$('#endTime').value) { toast('请配置活动时间'); return; }
       if ($('#endTime').value <= $('#beginTime').value) { toast('活动结束时间必须晚于开始时间'); $('#endTime').focus(); return; }
       if (!isPositiveIntegerInRange($('#limitedRate').value, 1, 50)) { toast('限时膨胀比例需为1～50的正整数'); $('#limitedRate').focus(); return; }
+      if (!isPositiveIntegerInRange($('#limitedRateConfirm').value, 1, 50)) { toast('确认限时膨胀比例需为1～50的正整数'); $('#limitedRateConfirm').focus(); return; }
+      if ($('#limitedRateConfirm').value !== $('#limitedRate').value) { toast('两次输入的限时膨胀比例不一致，请重新确认'); $('#limitedRateConfirm').focus(); return; }
       if (!isPositiveIntegerInRange($('#regularRate').value, 1, 50)) { toast('常规膨胀比例需为1～50的正整数'); $('#regularRate').focus(); return; }
       const external = $('input[name="acquisitionMethod"]:checked').value === 'external';
       if (external && !isPositiveIntegerInRange($('#validDays').value, 1, 365)) { toast('有效天数需为1～365的正整数'); $('#validDays').focus(); return; }
@@ -250,6 +253,7 @@
     $('#resetBtn').addEventListener('click', () => {
       $('#expansionForm').reset();
       $('#limitedRate').value = '1';
+      $('#limitedRateConfirm').value = '';
       $('#regularRate').value = '1';
       ['#prophetFields', '#abFields', '#rightsFields', '#smsFields', '#callFields', '#externalModules'].forEach(id => toggle(id, false));
       toggle('#prophetOption', true);
