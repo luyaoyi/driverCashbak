@@ -141,7 +141,7 @@
                 <div class="form-row"><label class="label required">活动说明</label><div class="control"><textarea placeholder="请输入活动说明"></textarea></div></div>
                 <div class="form-row"><label class="label required">规则说明</label><div class="control"><textarea placeholder="请输入规则说明"></textarea></div></div>
                 <div class="form-row"><label class="label">奖励中心入口文案</label><div class="control"><input id="rewardCenterEntryCopy" type="text" placeholder="请输入奖励中心入口文案（选填）" /><div class="tip">非必填；未配置时不展示自定义入口文案。历史活动默认为空。</div></div></div>
-                <div class="form-row"><label class="label">最高奖励价值</label><div class="control"><div class="inline"><input id="maxRewardValue" type="number" min="1" step="1" placeholder="请输入最高奖励价值（选填）" /><span class="unit">元</span></div><div class="tip">非必填；填写时仅支持正整数。仅用于前端展示，不参与抽奖及奖励发放计算。</div></div></div>
+                <div class="form-row"><label class="label">奖励中心 banner</label><div class="control"><div class="upload"><span class="plus">＋</span><span>上传图片</span></div><div class="tip">非必填；仅允许上传 1 张图片，支持 JPG/PNG 格式。历史活动默认为空。</div></div></div>
               </div>
             </section>
 
@@ -182,7 +182,6 @@
       if (!$('#beginTime').value||!$('#endTime').value) { toast('请配置活动有效期'); return; }
       if ($('#endTime').value <= $('#beginTime').value) { toast('活动结束时间必须晚于开始时间'); $('#endTime').focus(); return; }
       const baseTimes=Number($('#dailyBaseTimes').value); if (!Number.isInteger(baseTimes)||baseTimes<0||baseTimes>10) { toast('每日基础次数需为0～10的整数'); $('#dailyBaseTimes').focus(); return; }
-      const maxRewardValue=$('#maxRewardValue').value.trim(); if (maxRewardValue && (!/^\d+$/.test(maxRewardValue)||Number(maxRewardValue)<=0)) { toast('最高奖励价值仅支持正整数'); $('#maxRewardValue').focus(); return; }
       toast('校验通过，原型模拟保存成功');
     });
     $('#closeBtn').addEventListener('click', () => toast('原型模式：已触发关闭操作'));
